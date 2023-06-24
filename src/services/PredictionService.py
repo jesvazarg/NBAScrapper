@@ -221,7 +221,7 @@ def create_gridmodel_and_predict(connection: Connection, season: int):
     games_comp = create_dataset(connection, season, False)
     path_exist = os.path.exists("src/csv")
     if not path_exist:
-        os.makedirs("srccsv")
+        os.makedirs("src/csv")
     games_comp.to_csv('src/' + full_csv_name + '.csv', index=False)
     games = games_comp.drop(columns=["game_id"])
 

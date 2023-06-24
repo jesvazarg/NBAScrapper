@@ -101,9 +101,9 @@ def bs4_waiting_time():
 
 
 def wait_next_day():
-    """The information is updated at 10:37, then wait until 11:00"""
+    """The information is updated at 10:37, then wait until 11:00, but the server time has two hours less"""
     time_to_update = datetime.now()
-    time_to_update = time_to_update.replace(hour=11, minute=0)
+    time_to_update = time_to_update.replace(hour=9, minute=0)
 
     now = datetime.now()
 

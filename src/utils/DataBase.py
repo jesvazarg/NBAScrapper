@@ -8,6 +8,9 @@ from NBAScrapper.src.utils import Log
 
 RECONNECTION_WAITING_TIME = 60  # Seconds
 RECONNECTION_ATTEMPTS = 5
+USER = 'admin'
+PASSWORD = 'nba-pred-tfg'
+HOST = 'nba.cjpc8inv461q.eu-west-3.rds.amazonaws.com'
 DB_PROD_NAME = "nba"
 DB_TEST_NAME = "test"
 
@@ -31,9 +34,7 @@ def open_connection() -> Connection:
 
     while is_error is True:
         try:
-            connect.cnx = mysql.connector.connect(user='admin', password='nba-pred-tfg',
-                                                  host='nba.cjpc8inv461q.eu-west-3.rds.amazonaws.com',
-                                                  database=get_db_name())
+            connect.cnx = mysql.connector.connect(user=USER, password=PASSWORD, host=HOST, database=get_db_name())
             connect.cursor = connect.cnx.cursor(buffered=True)
             is_error = False
         except mysql.connector.Error as error:

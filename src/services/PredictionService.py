@@ -222,7 +222,7 @@ def create_gridmodel_and_predict(connection: Connection, season: int):
     path_exist = os.path.exists("src/csv")
     if not path_exist:
         os.makedirs("src/csv")
-    games_comp.to_csv('src/' + full_csv_name + '.csv', index=False)
+    games_comp.to_csv('src/csv/' + full_csv_name + '.csv', index=False)
     games = games_comp.drop(columns=["game_id"])
 
     games['tpp_v'] = games['tpp_v'].astype(float)
@@ -240,7 +240,7 @@ def create_gridmodel_and_predict(connection: Connection, season: int):
     path_exist = os.path.exists("src/model")
     if not path_exist:
         os.makedirs("src/model")
-    joblib.dump(grid, "src/" + full_csv_name + ".sav")
+    joblib.dump(grid, "src/model" + full_csv_name + ".sav")
 
     result = CF.predict(X_test_prep)
 

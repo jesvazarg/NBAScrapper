@@ -72,7 +72,7 @@ def insert_seasons(connection: Connection, oldest_season: int, number_seasons: i
             # Insert the month in the season
             insert_new_months(connection, season_id)
 
-            if number_seasons > 2:
+            if number_seasons > 1:
                 PredictionService.create_gridmodel_and_predict(connection, season_id + 2)
                 Log.log_info(str(season_id), " + Created a model from season " + str(season_id))
 

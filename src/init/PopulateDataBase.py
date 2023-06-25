@@ -9,6 +9,9 @@ def check_and_insert():
         Log.create_logging("connection_error")
         connection = DataBase.open_connection()
 
+        PredictionService.create_gridmodel_and_predict(connection, 2023)
+        PredictionService.create_gridmodel_and_predict(connection, 2022)
+
         current_season_id = SeasonService.get_current_season(connection)
         TeamService.check_and_insert(connection, current_season_id)
         number_seasons = SeasonRepository.get_number_seasons(connection)

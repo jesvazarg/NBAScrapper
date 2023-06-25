@@ -126,12 +126,6 @@ def create_dataset(connection: Connection, season: int, is_prediction: bool):
             games.loc[i, "ftp_h"] = ftp_h / NUM_PREVIOUS_GAME
 
     games = games[games.season != min_season]
-    """
-    if is_prediction:
-        games = games.drop(columns=["date", "season"])
-    else:
-        games = games.drop(columns=["game_id", "date", "season"])
-    """
     games = games.drop(columns=["date", "season"])
 
     return games

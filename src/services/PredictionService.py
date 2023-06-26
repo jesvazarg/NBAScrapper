@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, OneHotEncoder
 
 from NBAScrapper.src.repository import PredictionRepository, GameRepository
-from NBAScrapper.src.utils import DataBase, Log
+from NBAScrapper.src.utils import DataBase
 from NBAScrapper.src.utils.DataBase import Connection
 
 
@@ -22,7 +22,7 @@ SCALER = "StandardScaler"
 CF = SGDClassifier()
 
 
-def create_dataset(connection: Connection, season: int, is_prediction: bool):
+def create_dataset(connection: Connection, season: int, is_prediction: bool, is_current_season: bool):
     """Create the dataset from the season to predict results"""
     vars = ['game_id', 'visitor_team', 'home_team', 'date', 'month', 'season',
             'tp_v', 'tpp_v', 'dp_v', 'dpp_v', 'ft_v', 'ftp_v', 'tp_h', 'tpp_h', 'dp_h', 'dpp_h', 'ft_h', 'ftp_h']
@@ -126,7 +126,10 @@ def create_dataset(connection: Connection, season: int, is_prediction: bool):
             games.loc[i, "ftp_h"] = ftp_h / NUM_PREVIOUS_GAME
 
     games = games[games.season != min_season]
-    games = games.drop(columns=["date", "season"])
+    if is_current_season:
+        games = games.drop(columns=["date", "season"])
+    else:
+        games = games.drop(columns=["date"])
 
     return games
 
@@ -208,11 +211,11 @@ def has_csv(season: int) -> bool:
     return False
 
 
-def create_gridmodel_and_predict(connection: Connection, season: int):
-    """Create a grid model of a seeason and predict all their results"""
+def create_current_model(connection: Connection, season: int):
+    """Update the current grid model"""
     full_csv_name = get_full_csv_name(season)
 
-    games_comp = create_dataset(connection, season, False)
+    games_comp = create_dataset(connection, season, False, True)
     path_exist = os.path.exists("src/csv")
     if not path_exist:
         os.makedirs("src/csv")
@@ -236,100 +239,75 @@ def create_gridmodel_and_predict(connection: Connection, season: int):
         os.makedirs("src/model")
     joblib.dump(grid, "src/model" + full_csv_name + ".sav")
 
-    result = CF.predict(X_test_prep)
-
-    np = 0
-    for i in range(len(X_test)):
-        g = games_comp[(games_comp['tp_v'].astype(float) == X_test['tp_v'].values[i]) &
-                       (games_comp['tpp_v'].astype(float) == X_test['tpp_v'].values[i]) &
-                       (games_comp['dp_v'].astype(float) == X_test['dp_v'].values[i]) &
-                       (games_comp['dpp_v'].astype(float) == X_test['dpp_v'].values[i]) &
-                       (games_comp['ft_v'].astype(float) == X_test['ft_v'].values[i]) &
-                       (games_comp['ftp_v'].astype(float) == X_test['ftp_v'].values[i]) &
-                       (games_comp['tp_h'].astype(float) == X_test['tp_h'].values[i]) &
-                       (games_comp['tpp_h'].astype(float) == X_test['tpp_h'].values[i]) &
-                       (games_comp['dp_h'].astype(float) == X_test['dp_h'].values[i]) &
-                       (games_comp['dpp_h'].astype(float) == X_test['dpp_h'].values[i]) &
-                       (games_comp['ft_h'].astype(float) == X_test['ft_h'].values[i]) &
-                       (games_comp['ftp_h'].astype(float) == X_test['ftp_h'].values[i])
-                       ]
-        if len(g) == 1:
-            game_id = g['game_id'].values[0]
-            if result[i] == 1:
-                visitor_win = g['visitor_team'].values[0]
-            else:
-                visitor_win = g['home_team'].values[0]
-            GameRepository.save_prediction(connection, game_id, visitor_win)
-        else:
-            np += 1
-
-    result = CF.predict(X_train_prep)
-
-    for i in range(len(X_train)):
-        g = games_comp[(games_comp['tp_v'].astype(float) == X_train['tp_v'].values[i]) &
-                       (games_comp['tpp_v'].astype(float) == X_train['tpp_v'].values[i]) &
-                       (games_comp['dp_v'].astype(float) == X_train['dp_v'].values[i]) &
-                       (games_comp['dpp_v'].astype(float) == X_train['dpp_v'].values[i]) &
-                       (games_comp['ft_v'].astype(float) == X_train['ft_v'].values[i]) &
-                       (games_comp['ftp_v'].astype(float) == X_train['ftp_v'].values[i]) &
-                       (games_comp['tp_h'].astype(float) == X_train['tp_h'].values[i]) &
-                       (games_comp['tpp_h'].astype(float) == X_train['tpp_h'].values[i]) &
-                       (games_comp['dp_h'].astype(float) == X_train['dp_h'].values[i]) &
-                       (games_comp['dpp_h'].astype(float) == X_train['dpp_h'].values[i]) &
-                       (games_comp['ft_h'].astype(float) == X_train['ft_h'].values[i]) &
-                       (games_comp['ftp_h'].astype(float) == X_train['ftp_h'].values[i])
-                       ]
-
-        if len(g) == 1:
-            game_id = g['game_id'].values[0]
-            if result[i] == 1:
-                visitor_win = g['visitor_team'].values[0]
-            else:
-                visitor_win = g['home_team'].values[0]
-            GameRepository.save_prediction(connection, game_id, visitor_win)
-        else:
-            np += 1
-
-    if np > 0:
-        Log.log_warning(str(season), str(np) + " games have not predicted")
-
-    DataBase.commit(connection)
-
 
 def predict_new_games(connection: Connection, season: int):
-    """Predict wich team will win in the games what have not been played yet"""
+    """Predict which team will win in the games what have not been played yet"""
     full_csv_name = get_full_csv_name(season)
     # Load the model
     model = joblib.load("src/model/" + full_csv_name + ".sav")
-    games = create_dataset(connection, season, True)
+    games = create_dataset(connection, season, True, True)
 
-    games_to_predict = games[games.to_predict == 1]
-    if len(games_to_predict) > 0:
+    games['tpp_v'] = games['tpp_v'].astype(float)
+    games['dpp_v'] = games['dpp_v'].astype(float)
+    games['ftp_v'] = games['ftp_v'].astype(float)
+    games['tpp_h'] = games['tpp_h'].astype(float)
+    games['dpp_h'] = games['dpp_h'].astype(float)
+    games['ftp_h'] = games['ftp_h'].astype(float)
+
+    full_games_to_predict = games[games.to_predict == 1]
+    if len(full_games_to_predict) > 0:
         games_train = games[games.to_predict == 0]
-        games_to_predict = games_to_predict.drop(columns=["game_id", "to_predict"])
+        games_to_predict = full_games_to_predict.drop(columns=["game_id", "to_predict"])
         games_train = games_train.drop(columns=["game_id", "to_predict"])
 
-        games_to_predict['tpp_v'] = games_to_predict['tpp_v'].astype(float)
-        games_to_predict['dpp_v'] = games_to_predict['dpp_v'].astype(float)
-        games_to_predict['ftp_v'] = games_to_predict['ftp_v'].astype(float)
-        games_to_predict['tpp_h'] = games_to_predict['tpp_h'].astype(float)
-        games_to_predict['dpp_h'] = games_to_predict['dpp_h'].astype(float)
-        games_to_predict['ftp_h'] = games_to_predict['ftp_h'].astype(float)
-
-        games_train['tpp_v'] = games_train['tpp_v'].astype(float)
-        games_train['dpp_v'] = games_train['dpp_v'].astype(float)
-        games_train['ftp_v'] = games_train['ftp_v'].astype(float)
-        games_train['tpp_h'] = games_train['tpp_h'].astype(float)
-        games_train['dpp_h'] = games_train['dpp_h'].astype(float)
-        games_train['ftp_h'] = games_train['ftp_h'].astype(float)
-
-        X_train, X_test = preprocessor_model(SCALER, games_train, games_to_predict)
-        result = model.predict(X_test)
-        for i in games_to_predict.index:
-            game_id = games.loc[i].game_id
-            if result[1] == 1:
-                visitor_win = games.loc[i].visitor_team
+        games_train_prep, games_to_predict_prep = preprocessor_model(SCALER, games_train, games_to_predict)
+        result = model.predict(games_to_predict_prep)
+        for i in range(len(full_games_to_predict)):
+            game_id = full_games_to_predict.iloc[i].game_id
+            if result[i] == 1:
+                visitor_win = full_games_to_predict.iloc[i].visitor_team
             else:
-                visitor_win = games.loc[i].home_team
+                visitor_win = full_games_to_predict.iloc[i].home_team
             GameRepository.save_prediction(connection, game_id, visitor_win)
+        DataBase.commit(connection)
+
+
+def predict_season_games(connection: Connection, season: int):
+    """Predict which team will win in the games from a season"""
+    full_csv_name = get_full_csv_name(season)
+
+    games = create_dataset(connection, season, False, False)
+    path_exist = os.path.exists("src/csv")
+    if not path_exist:
+        os.makedirs("src/csv")
+    games.to_csv('src/csv/' + full_csv_name + '.csv', index=False)
+
+    games['tpp_v'] = games['tpp_v'].astype(float)
+    games['dpp_v'] = games['dpp_v'].astype(float)
+    games['ftp_v'] = games['ftp_v'].astype(float)
+    games['tpp_h'] = games['tpp_h'].astype(float)
+    games['dpp_h'] = games['dpp_h'].astype(float)
+    games['ftp_h'] = games['ftp_h'].astype(float)
+
+    for month in games[games.season == season]['month'].unique():
+        games_train = games[games.index > games.index[
+            (games.season == season) & (games.month == month)]
+                [len(games.index[(games.season == season) & (games.month == month)])-1]
+        ]
+        y_train = games_train[RESULT_NAME]
+        games_train = games_train.drop(columns=["game_id", "season", RESULT_NAME])
+        full_games_test = games[(games.season == season) & (games.month == month)]
+        games_test = full_games_test.drop(columns=["game_id", "season", RESULT_NAME])
+        games_train_prep, games_test_prep = preprocessor_model(SCALER, games_train, games_test)
+        grid = CF.fit(X=games_train_prep, y=y_train)
+        result = grid.predict(games_test_prep)
+
+        for i in range(len(full_games_test)):
+            game_id = full_games_test.iloc[i].game_id
+            if result[i] == 1:
+                prediction = full_games_test.iloc[i].visitor_team
+            else:
+                prediction = full_games_test.iloc[i].home_team
+            GameRepository.save_prediction(connection, game_id, prediction)
+
         DataBase.commit(connection)

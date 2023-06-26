@@ -9,6 +9,10 @@ def check_and_insert():
         Log.create_logging("connection_error")
         connection = DataBase.open_connection()
 
+        PredictionService.predict_season_games(connection, 2023)
+        PredictionService.predict_season_games(connection, 2022)
+        PredictionService.predict_season_games(connection, 2021)
+
         current_season_id = SeasonService.get_current_season(connection)
         TeamService.check_and_insert(connection, current_season_id)
         number_seasons = SeasonRepository.get_number_seasons(connection)
@@ -23,11 +27,10 @@ def check_and_insert():
             if number_seasons > 3:
                 has_model = PredictionService.has_model(current_season_id)
                 if BS4Connection.is_full_check() or not has_model:
-                    PredictionService.create_gridmodel_and_predict(connection, current_season_id)
+                    PredictionService.create_current_model(connection, current_season_id)
                     if has_model:
                         Log.log_info(str(current_season_id), " + Created a model from season " + str(current_season_id))
-                else:
-                    PredictionService.predict_new_games(connection, current_season_id)
+                PredictionService.predict_new_games(connection, current_season_id)
 
             # Before 1968 it changes format, then not load more seasons
             if oldest_season > 1968:

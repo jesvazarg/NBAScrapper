@@ -73,8 +73,8 @@ def insert_seasons(connection: Connection, oldest_season: int, number_seasons: i
             insert_new_months(connection, season_id)
 
             if number_seasons > 1:
-                PredictionService.create_gridmodel_and_predict(connection, season_id + 2)
-                Log.log_info(str(season_id), " + Created a model from season " + str(season_id))
+                PredictionService.predict_season_games(connection, season_id + 2)
+                Log.log_info(str(season_id), " * All games have been predicted from season " + str(season_id))
 
             break
 
@@ -84,8 +84,8 @@ def insert_seasons(connection: Connection, oldest_season: int, number_seasons: i
             insert_new_months(connection, season_id)
 
             if number_seasons > 2:
-                PredictionService.create_gridmodel_and_predict(connection, season_id + 2)
-                Log.log_info(str(season_id), " + Created a model from season " + str(season_id))
+                PredictionService.predict_season_games(connection, season_id + 2)
+                Log.log_info(str(season_id), " * All games have been predicted from season " + str(season_id))
 
 
 def insert_new_months(connection: Connection, season_id: int):

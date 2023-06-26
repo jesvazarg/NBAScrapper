@@ -237,7 +237,7 @@ def create_current_model(connection: Connection, season: int):
     path_exist = os.path.exists("src/model")
     if not path_exist:
         os.makedirs("src/model")
-    joblib.dump(grid, "src/model" + full_csv_name + ".sav")
+    joblib.dump(grid, "src/model/" + full_csv_name + ".sav")
 
 
 def predict_new_games(connection: Connection, season: int):

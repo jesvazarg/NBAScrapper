@@ -195,7 +195,7 @@ def get_full_csv_name(season: int) -> str:
 
 def has_model(season: int) -> bool:
     """Check if the model of the season has been created"""
-    for file in glob.glob("src/model/*"):
+    for file in glob.glob("../model/*"):
         if file.split("\\")[1][:4] == str(season):
             return True
 
@@ -204,7 +204,7 @@ def has_model(season: int) -> bool:
 
 def has_csv(season: int) -> bool:
     """Check if the csv of the season has been created"""
-    for file in glob.glob("src/csv/*"):
+    for file in glob.glob("../csv/*"):
         if file.split("\\")[1][:4] == str(season):
             return True
 

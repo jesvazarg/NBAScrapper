@@ -80,7 +80,7 @@ def save_game_details(connection: Connection, game: Game, visitor_players: list[
                     if ele.next_sibling.next_sibling is not None else None
                 is_quarter_finished = text_quarter_finished[:6] == "End of" \
                     if text_quarter_finished is not None else False
-                if time == "0:00" and is_quarter_finished:
+                if is_quarter_finished:
                     # Quarter is finished
                     quarter += 1
                     column += 2

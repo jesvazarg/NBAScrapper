@@ -121,3 +121,17 @@ def get_number_season_month_from_season(connection: Connection, season_id: int) 
              "WHERE season_id=" + str(season_id))
     DataBase.execute(connection, query)
     return int(connection.cursor.fetchone()[0])
+
+
+def delete_season_month_from_season(connection: Connection, season_id: int):
+    """Remove all season_month from the season"""
+    delete_season_month = ("DELETE FROM season_month "
+                          "WHERE season_id=" + str(season_id))
+    DataBase.execute(connection, delete_season_month)
+
+
+def delete_season(connection: Connection, season_id: int):
+    """Remove all season"""
+    delete_season = ("DELETE FROM season "
+                          "WHERE id=" + str(season_id))
+    DataBase.execute(connection, delete_season)

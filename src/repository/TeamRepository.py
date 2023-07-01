@@ -171,3 +171,10 @@ def get_teams_by_old_id(connection: Connection, old_id: str) -> list[Team]:
                  team[11], team[12], team[13], team[14], team[15], team[16], team[17], team[18], team[19], team[20],
                  team[21], team[22], team[23])
             for team in connection.cursor.fetchall()]
+
+
+def delete_teams_from_season(connection: Connection, season_id: int):
+    """Remove all team_hist from the season"""
+    delete_team_hist = ("DELETE FROM team_hist "
+                        "WHERE season_id=" + str(season_id))
+    DataBase.execute(connection, delete_team_hist)

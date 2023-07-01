@@ -882,3 +882,13 @@ def strings_ignored(html: BeautifulSoup, season_id: int, is_substitution_active:
         Log.log_warning(str(season_id), "String not contemplated -> " + str(html))
 
     return column_increment
+
+
+def delete_plays_from_season(connection: Connection, season_id: int):
+    PlayRepository.delete_tree_points_from_season(connection, season_id)
+    PlayRepository.delete_two_points_from_season(connection, season_id)
+    PlayRepository.delete_free_throw_from_season(connection, season_id)
+    PlayRepository.delete_rebound_from_season(connection, season_id)
+    PlayRepository.delete_foul_from_season(connection, season_id)
+    PlayRepository.delete_turnover_from_season(connection, season_id)
+    PlayRepository.delete_substitution_from_season(connection, season_id)

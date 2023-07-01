@@ -1,5 +1,8 @@
+from os import remove
+
 from NBAScrapper.src.repository import SeasonRepository
-from NBAScrapper.src.services import SeasonService, TeamService, GameService, PredictionService
+from NBAScrapper.src.services import SeasonService, TeamService, GameService, PredictionService, PlayService, \
+    PlayerService
 from NBAScrapper.src.utils import DataBase, Log, BS4Connection, URLs
 
 
@@ -53,6 +56,28 @@ def test(game_id: str):
         Log.log_info("test", "visitor_point: " + str(visitor_point) + ", home_point: " + str(home_point))
 
 
+def delete_season_complete(season_id: int):
+    Log.create_logging("connection_error")
+    connection = DataBase.open_connection()
+
+    if SeasonRepository.get_season(connection, season_id):
+        print("Removing all season " + str(season_id) + " complete")
+        PlayService.delete_plays_from_season(connection, season_id)
+        GameService.delete_games_from_season(connection, season_id)
+        PlayerService.delete_players_from_season(connection, season_id)
+        TeamService.delete_teams_from_season(connection, season_id)
+        SeasonService.delete_season(connection, season_id)
+
+        DataBase.commit(connection)
+        remove("src/logs/nba-" + str(season_id) + ".log")
+    else:
+        print("Season " + str(season_id) + " no exist")
+
+    DataBase.close_connection(connection)
+
+
 if __name__ == "__main__":
-    # test("202305110PHI")
+    delete_season_complete(2012)
+    delete_season_complete(2013)
+    delete_season_complete(2014)
     check_and_insert()

@@ -9,6 +9,7 @@ from NBAScrapper.src.utils import DataBase, Log, BS4Connection, URLs
 def check_and_insert():
     """Main routine"""
     while 1:
+        print("Starting the processor")
         Log.create_logging("connection_error")
         connection = DataBase.open_connection()
 
@@ -77,7 +78,4 @@ def delete_season_complete(season_id: int):
 
 
 if __name__ == "__main__":
-    delete_season_complete(2012)
-    delete_season_complete(2013)
-    delete_season_complete(2014)
     check_and_insert()

@@ -239,3 +239,7 @@ def get_new_old_id(connection: Connection, old_id: str, season_id: int) -> Team:
             return teams[0]
         else:
             return None
+
+
+def delete_teams_from_season(connection: Connection, season_id: int):
+    TeamRepository.delete_teams_from_season(connection, season_id)

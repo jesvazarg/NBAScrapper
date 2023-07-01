@@ -284,3 +284,7 @@ def add_player_hist_stats(connection: Connection, player_hist: PlayerHist, playe
     player_hist.drw += player.drw
 
     PlayerRepository.update_player_history_score(connection, player_hist)
+
+
+def delete_players_from_season(connection: Connection, season_id: int):
+    PlayerRepository.delete_players_from_season(connection, season_id)

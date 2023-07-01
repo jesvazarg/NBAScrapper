@@ -354,3 +354,9 @@ def delete_game(game_id: str):
     DataBase.commit(connection)
 
     DataBase.close_connection(connection)
+
+
+def delete_games_from_season(connection: Connection, season_id: int):
+    GameRepository.delete_visitor_players_from_season(connection, season_id)
+    GameRepository.delete_home_players_from_season(connection, season_id)
+    GameRepository.delete_games_from_season(connection, season_id)

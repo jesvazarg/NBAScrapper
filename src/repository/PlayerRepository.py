@@ -167,3 +167,10 @@ def leave_team(connection: Connection, player_id: str):
                      "orb=0, drb=0, ast=0, stl=0, blk=0, tov=0, foul=0, drw=0 "
                      "WHERE id='" + str(player_id) + "'")
     DataBase.execute(connection, update_player)
+
+
+def delete_players_from_season(connection: Connection, season_id: int):
+    """Remove all player_hist from the season"""
+    delete_player_hist = ("DELETE FROM player_hist "
+                          "WHERE season_id=" + str(season_id))
+    DataBase.execute(connection, delete_player_hist)

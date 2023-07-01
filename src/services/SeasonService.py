@@ -132,3 +132,8 @@ def insert_new_months(connection: Connection, season_id: int):
 
     if is_saved_finished:
         Log.log_info(str(season_id), "All MONTHS of season " + str(season_id) + " have been saved successfully")
+
+
+def delete_season(connection: Connection, season_id: int):
+    SeasonRepository.delete_season_month_from_season(connection, season_id)
+    SeasonRepository.delete_season(connection, season_id)

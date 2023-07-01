@@ -175,3 +175,29 @@ def save_prediction(connection, game_id: str, team_winner: str):
                    "WHERE (id=%s)")
     data_game = (str(team_winner), str(game_id))
     DataBase.execute(connection, update_game, data_game)
+
+
+def delete_visitor_players_from_season(connection: Connection, season_id: int):
+    """Remove all game_visitor_player from the season"""
+    delete_visitor_player = ("DELETE FROM game_visitor_player "
+                             "WHERE game_id IN "
+                             "(SELECT id FROM game WHERE season_month_id IN "
+                             "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_visitor_player)
+
+
+def delete_home_players_from_season(connection: Connection, season_id: int):
+    """Remove all game_home_player from the season"""
+    delete_home_player = ("DELETE FROM game_home_player "
+                          "WHERE game_id IN "
+                          "(SELECT id FROM game WHERE season_month_id IN "
+                          "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_home_player)
+
+
+def delete_games_from_season(connection: Connection, season_id: int):
+    """Remove all games from the season"""
+    delete_games = ("DELETE FROM game "
+                    "WHERE season_month_id IN "
+                    "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + ")")
+    DataBase.execute(connection, delete_games)

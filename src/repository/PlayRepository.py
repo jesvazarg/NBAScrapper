@@ -279,3 +279,64 @@ def get_substitutions_by_game(connection: Connection, game_id: str) -> list[Subs
     substitutions = connection.cursor.fetchall()
     return [SubstitutionPlay(substitution[0], substitution[1], substitution[2], substitution[3], substitution[4],
                              substitution[5], substitution[6], substitution[7]) for substitution in substitutions]
+
+
+def delete_tree_points_from_season(connection: Connection, season_id: int):
+    """Remove all three_pointer from the season"""
+    delete_tree_points = ("DELETE FROM three_pointer_play "
+                          "WHERE game_id IN "
+                          "(SELECT id FROM game WHERE season_month_id IN "
+                          "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_tree_points)
+
+
+def delete_two_points_from_season(connection: Connection, season_id: int):
+    """Remove all two_pointer from the season"""
+    delete_two_points = ("DELETE FROM two_pointer_play "
+                         "WHERE game_id IN "
+                         "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_two_points)
+
+
+def delete_free_throw_from_season(connection: Connection, season_id: int):
+    """Remove all free_throw from the season"""
+    delete_free_throw = ("DELETE FROM free_throw_play "
+                         "WHERE game_id IN "
+                         "(SELECT id FROM game WHERE season_month_id IN "
+                         "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_free_throw)
+
+
+def delete_rebound_from_season(connection: Connection, season_id: int):
+    """Remove all rebound from the season"""
+    delete_rebound = ("DELETE FROM rebound_play "
+                      "WHERE game_id IN "
+                      "(SELECT id FROM game WHERE season_month_id IN "
+                      "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_rebound)
+
+
+def delete_foul_from_season(connection: Connection, season_id: int):
+    """Remove all foul from the season"""
+    delete_foul = ("DELETE FROM foul_play "
+                   "WHERE game_id IN "
+                   "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_foul)
+
+
+def delete_turnover_from_season(connection: Connection, season_id: int):
+    """Remove all turnover from the season"""
+    delete_turnover = ("DELETE FROM turnover_play "
+                       "WHERE game_id IN "
+                       "(SELECT id FROM game WHERE season_month_id IN "
+                       "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_turnover)
+
+
+def delete_substitution_from_season(connection: Connection, season_id: int):
+    """Remove all substitution from the season"""
+    delete_substitution = ("DELETE FROM substitution_play "
+                           "WHERE game_id IN "
+                           "(SELECT id FROM game WHERE season_month_id IN "
+                           "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
+    DataBase.execute(connection, delete_substitution)

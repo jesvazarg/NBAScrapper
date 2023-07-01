@@ -294,6 +294,7 @@ def delete_two_points_from_season(connection: Connection, season_id: int):
     """Remove all two_pointer from the season"""
     delete_two_points = ("DELETE FROM two_pointer_play "
                          "WHERE game_id IN "
+                         "(SELECT id FROM game WHERE season_month_id IN "
                          "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
     DataBase.execute(connection, delete_two_points)
 
@@ -320,6 +321,7 @@ def delete_foul_from_season(connection: Connection, season_id: int):
     """Remove all foul from the season"""
     delete_foul = ("DELETE FROM foul_play "
                    "WHERE game_id IN "
+                   "(SELECT id FROM game WHERE season_month_id IN "
                    "(SELECT id FROM season_month WHERE season_id=" + str(season_id) + "))")
     DataBase.execute(connection, delete_foul)
 
